@@ -102,7 +102,7 @@ export class ChatService {
       messages: this.activeConversation!.messages
     };
 
-    return this.http.post('https://med-chat-backend-1.onrender.com', body);
+    return this.http.post('https://med-chat-backend-1.onrender.com/chat', body);
   }
 
   /** LocalStorage */
