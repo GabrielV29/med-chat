@@ -102,7 +102,7 @@ export class ChatService {
       messages: this.activeConversation!.messages
     };
 
-    return this.http.post('http://127.0.0.1:8000/chat', body);
+    return this.http.post('https://med-chat-backend-1.onrender.com', body);
   }
 
   /** LocalStorage */
