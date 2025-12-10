@@ -1,1 +1,14 @@
-/* You can add global styles to this file, and also import other style files */
+:root{
+    --glass-bg: rgba(255,255,255,0.88);
+    --glass-stroke: rgba(255,255,255,0.22);
+    --glass-highlight: rgba(255,255,255,0.6);
+    --accent: rgba(167,139,250,0.95);
+    --muted: rgba(255,255,255,0.75);
+    --shadow-1: 0 6px 18px rgba(0,0,0,0.35);
+    --radius: 16px;
+    --gap: 12px;
+}
+
+body{
+    background: linear-gradient(130deg, #e0e0e0, #ffffff);
+}

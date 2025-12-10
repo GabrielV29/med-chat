@@ -1,0 +1,22 @@
+<div class="sidebar glass-panel" *ngIf="sidebarVisible">
+
+  <h2>Historial</h2>
+
+  <button class="new-btn" (click)="handleNewConversation()">+ Nueva</button>
+
+  <ul>
+    <li *ngFor="let conv of conversations" 
+        [class.active]="conv.id === selectedId">
+
+      <span (click)="handleLoadConversation(conv.id)">
+        {{ conv.title }}
+      </span>
+
+      <button class="delete-btn" 
+              (click)="handleDeleteConversation(conv.id)">🗑️</button>
+    </li>
+  </ul>
+</div>
+
+
+

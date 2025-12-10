@@ -1,0 +1,15 @@
+<div class="chat-window">
+    <div *ngFor="let msg of messages" class="messages-box" [ngClass]="msg.from">
+        {{ msg.text }}
+    </div>
+
+    <div *ngIf="loading" class="loading">
+        MedAI está escribiendo...
+    </div>
+</div>
+
+<!-- Barra fija abajo -->
+<div class="chat-input-bar">
+    <input [(ngModel)]="userMessage" placeholder="Escribe tu mensaje..." />
+    <button type="button" (click)="send()">Enviar</button>
+</div>
