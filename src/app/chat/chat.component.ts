@@ -59,7 +59,7 @@ export class ChatComponent {
     this.userMessage ='';
     this.loading = true;
 
-    this.http.post<any>('http://127.0.0.1:8000/chat', {text: messageToSend}).subscribe({
+    this.http.post<any>('https://med-chat-backend-1.onrender.com/chat', {text: messageToSend}).subscribe({
       next: (response: any) => {
         // Evita error de tipo response es un object genérico
         const replyText = (response && (response.reply || response.text || response.message)) ?? 'No hubo respuesta.';
