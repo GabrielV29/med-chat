@@ -1,15 +1,32 @@
-<div class="chat-window">
-    <div *ngFor="let msg of messages" class="messages-box" [ngClass]="msg.from">
-        {{ msg.text }}
+<div class="chat-container">
+  <div class="chat-window" #scrollContainer>
+    <div *ngFor="let msg of messages" class="message-row" [ngClass]="msg.from">
+      <div class="avatar" *ngIf="msg.from === 'assistant'">MedAI</div>
+      <div class="bubble">
+        <div class="meta" [class.user]="msg.from === 'user'" [class.assistant]="msg.from === 'assistant'">
+          <div class="text">{{ msg.text }}</div>
+        </div>
+      </div>
+      <div class="avatar" *ngIf="msg.from === 'user'">TU</div>
     </div>
 
-    <div *ngIf="loading" class="loading">
-        MedAI está escribiendo...
+    <div *ngIf="loading" class="loading-row">
+      <div class="bubble assistant">
+        <div class="meta">MedAI</div>
+        <div class="text">MedAI está escribiendo...</div>
+      </div>
     </div>
-</div>
+  </div>
 
-<!-- Barra fija abajo -->
-<div class="chat-input-bar">
-    <input [(ngModel)]="userMessage" placeholder="Escribe tu mensaje..." />
-    <button type="button" (click)="send()">Enviar</button>
+  <form class="chat-input" (submit)="send($event)">
+    <input
+      [(ngModel)]="userMessage"
+      name="message"
+      rows = "1"
+      placeholder="Escribe tu mensaje..."
+      (keydown.enter)="send($event)"
+      maxlength="2000"
+      />
+    <button type="submit" [disabled]="loading || !userMessage.trim()">➤</button>
+  </form>
 </div>

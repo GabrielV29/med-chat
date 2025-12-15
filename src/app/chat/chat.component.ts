@@ -1,5 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ChatService } from '../services/chat.service'
 
 @Component({
@@ -7,73 +6,61 @@ import { ChatService } from '../services/chat.service'
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.scss']
 })
-export class ChatComponent {
+export class ChatComponent implements OnInit {
 
-  @Input() conversationId: string | null = null;
+  @ViewChild('scrollContainer') private scrollContainer!: ElementRef;
 
-  sidebarHidden = false;
-  userMessage: string = '';
-  messages: {from: 'user' | 'bot', text: string }[] = [];
+  userMessage: string = "";
+  messages: { from: 'user' | 'assistant', text: string }[] = [];
   loading: boolean = false;
 
-  constructor(private http: HttpClient){}
+  constructor(private chatService: ChatService){}
 
-  toggleSidebar(){
-    this.sidebarHidden = !this.sidebarHidden;
+  ngOnInit(){
+    // Recupera el historial de conversación si existe
+    const history = this.chatService.getHistory();
+    this.messages = history.map(m => ({ from: m.role === 'user' ? 'user' : 'assistant', text: m.content}));
+    setTimeout(() => this.scrollToBottom());
   }
 
-  ngOnChanges(changes: SimpleChanges){
-    if(changes['conversationId']){
-      this.loadConversation(this.conversationId);
-    }
-  }
+  send(event?: Event){
+    if (event) event.preventDefault();
+    const text = this.userMessage?.trim();
+    if (!text) return;
 
-  loadConversation(id: string | null){
-    // Si no hay id, iniciamos una conversación vacía
-    if(!id){
-      this.messages = [];
-      return;
-    }
-
-    const raw = localStorage.getItem(`conversation_${id}`);
-    this.messages = raw ? JSON.parse(raw) : [];
-  }
-
-  saveConversation(){
-    if (!this.conversationId) return;
-    localStorage.setItem(`conversation_${this.conversationId}`, JSON.stringify(this.messages));
-  }
-
-  send(){
-    if(!this.userMessage.trim()) return;
-
-    const messageToSend = this.userMessage;
-
-    //Agregar mensaje del ususario al historial
-    this.messages.push({ from: 'user', text: messageToSend});
-
-    // Guarda inmediatamente en localStorage (si hay id)
-    this.saveConversation();
-
-    //Limpiar input
-    this.userMessage ='';
+    this.userMessage = "";
     this.loading = true;
 
-    this.http.post<any>('http://127.0.0.1:8000/chat', {text: messageToSend}).subscribe({
-      next: (response: any) => {
-        // Evita error de tipo response es un object genérico
-        const replyText = (response && (response.reply || response.text || response.message)) ?? 'No hubo respuesta.';
-        this.messages.push({ from: 'bot', text: response.reply });
-        // guardar historico tras respuesta
-        this.saveConversation();
+    this.chatService.sendMessage(text).subscribe({
+      next: (res: any) => {
+        const reply = res?.reply ?? res?.message ?? 'No hay respuesta';
+
+        this.messages.push({from: 'user', text});
+        this.messages.push({from: 'assistant', text: reply});
+
+        this.chatService.addAssistantMessage(reply);
         this.loading = false;
+        this.scrollToBottom();
       },
-      error: (err) => {
-        console.error('Error al conectar con el backend:', err);
-        this.messages.push({ from: 'bot', text: 'Error: no se pudo obtener respuesta.'});
-        this.saveConversation();
+      error: () => {
+        this.messages.push({
+          from: 'assistant',
+          text: '❌ No se puso conectar con el servidor.'
+        });
         this.loading = false;
       }
     });
+  }
+
+  private scrollToBottom(){
+    try{
+      setTimeout(() =>{
+        if(this.scrollContainer){
+          this.scrollContainer.nativeElement.scrollTo({
+            top: this.scrollContainer.nativeElement.scrollHeight, behavior: 'smooth'
+          })
+        }
+      }, 50);
+    } catch (err){}
   }
 }

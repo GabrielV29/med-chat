@@ -1,22 +1,33 @@
-<div class="sidebar glass-panel" *ngIf="sidebarVisible">
+<div class="sidebar" [class.hidden]="!sidebarVisible">
 
-  <h2>Historial</h2>
+  <button class="toggle-btn" (click)="toggleSidebar()">
+    {{ sidebarVisible ? '⟨' : '⟩' }}
+  </button>
 
-  <button class="new-btn" (click)="handleNewConversation()">+ Nueva</button>
+  <div *ngIf="sidebarVisible" class="content">
+    <button class="new-btn" (click)="create.emit()">＋ Nueva</button>
 
-  <ul>
-    <li *ngFor="let conv of conversations" 
-        [class.active]="conv.id === selectedId">
+    <ul>
+      <li *ngFor="let conv of conversations"
+          [class.active]="conv.id === selectedId">
 
-      <span (click)="handleLoadConversation(conv.id)">
-        {{ conv.title }}
-      </span>
+        <div class="title"
+             *ngIf="editingId !== conv.id"
+             (click)="select.emit(conv.id)"
+             (dblclick)="startRename(conv)">
+          {{ conv.title }}
+        </div>
 
-      <button class="delete-btn" 
-              (click)="handleDeleteConversation(conv.id)">🗑️</button>
-    </li>
-  </ul>
+        <input *ngIf="editingId === conv.id"
+               [(ngModel)]="tempTitle"
+               (blur)="confirmRename(conv.id)"
+               (keydown.enter)="confirmRename(conv.id)" />
+
+        <button class="delete-btn"
+                (click)="remove.emit(conv.id)">
+          🗑️
+        </button>
+      </li>
+    </ul>
+  </div>
 </div>
-
-
-

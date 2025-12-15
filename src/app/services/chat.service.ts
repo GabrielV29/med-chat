@@ -1,13 +1,17 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable
 
-interface Message {
+ } from 'rxjs';
+
+import { environment } from '../../environments/environment';
+
+export interface Message {
   role: 'user' | 'assistant';
   content: string;
 }
 
-interface Conversation{
+export interface Conversation{
   id: string;
   title: string;
   messages: Message[];
@@ -30,31 +34,19 @@ export class ChatService {
   /** Conversaciones */
 
   createConversation(){
-    const newId = crypto.randomUUID();
-    const conversation: Conversation = {
-      id: newId,
+    const id = crypto.randomUUID();
+    this.conversations.push({
+      id,
       title: 'Nueva conversación',
       messages: [],
       createdAt: Date.now()
-    };
-
-    this.conversations.push(conversation);
-    this.activeConversationId = newId;
+    });
+    this.activeConversationId = id;
     this.saveToStorage();
   }
 
   getConversations(){
     return this.conversations;
-  }
-
-  deleteConversation(id: string){
-    this.conversations = this.conversations.filter(c => c.id !== id);
-
-    if (this.activeConversationId === id){
-      this.activeConversationId = null;
-    }
-
-    this.saveToStorage();
   }
 
   setActiveConversation(id: string){
@@ -79,9 +71,9 @@ export class ChatService {
   }
 
   addAssistantMessage(content: string){
-    if (!this.activeConversation) this.createConversation();
+    if (!this.activeConversation) return;
 
-    this.activeConversation!.messages.push({
+    this.activeConversation.messages.push({
       role: 'assistant',
       content
     });
@@ -93,16 +85,23 @@ export class ChatService {
     return this.activeConversation?.messages ?? [];
   }
 
+  deleteConversation(id: string){
+    this.conversations = this.conversations.filter(c => c.id !== id);
+
+    if (this.activeConversationId === id){
+      this.activeConversationId = null;
+    }
+
+    this.saveToStorage();
+  }
+
   /** Enviar al backend */
 
-  sendMessage(message: string): Observable<any>{
-    this.addUserMessage(message);
-
-    const body = {
-      messages: this.activeConversation!.messages
-    };
-
-    return this.http.post('http://127.0.0.1:8000/chat', body);
+  sendMessage(text: string): Observable<{ reply: string }>{
+    return this.http.post<{ reply: string }>(
+      `${environment.apiUrl}/chat`,
+      { text }
+    );
   }
 
   /** LocalStorage */

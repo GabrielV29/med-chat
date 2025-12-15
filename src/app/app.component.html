@@ -1,9 +1,12 @@
 <div class="layout">
   <!-- SIDEBAR (solo si está visible) -->
   <app-sidebar
-    (loadConversation)="onLoadConversation($event)"
-    (newConversation)="onNewConversation()"
-    (deleteConversation)="onDeleteConversation($event)">
+    [conversations]="conversations"
+    [selectedId]="activeId"
+    (create)="onCreate()"
+    (select)="onSelect($event)"
+    (remove)="onRemove($event)"
+    (rename)="onRename($event)">
   </app-sidebar>
 
   <!-- CHAT -->
